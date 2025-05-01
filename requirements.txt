@@ -2,7 +2,6 @@ flask
 gunicorn
 torch
 torchvision
-io
 base64
 numpy
 matplotlib
