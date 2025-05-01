@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dental Diagnosis Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+        }
+        
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4A7AFF 0%, #5C54FA 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 6px rgba(74, 122, 255, 0.3);
+        }
+        
+        .upload-area {
+            border: 2px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            border-color: #4A7AFF;
+            background-color: rgba(74, 122, 255, 0.05);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4A7AFF;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .shine {
+            background: linear-gradient(90deg, #f0f4f8 0%, #e2e8f0 50%, #f0f4f8 100%);
+            background-size: 200% 100%;
+            animation: shine 1.5s infinite;
+        }
+        
+        @keyframes shine {
+            to {
+                background-position-x: -200%;
+            }
+        }
+        
+        .treatment-section {
+            white-space: pre-line;
+        }
+        
+        .fadeIn {
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+        
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+        
+        /* Custom progress bar */
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e2e8f0;
+            margin-top: 4px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #4A7AFF 0%, #5C54FA 100%);
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-10">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-bold text-gray-800 mb-3 animate__animated animate__fadeIn">Dental Diagnosis Assistant</h1>
+            <p class="text-lg text-gray-600 animate__animated animate__fadeIn animate__delay-1s">Upload a dental image for AI analysis and treatment suggestions</p>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Upload Section -->
+            <div class="card bg-white p-6 animate__animated animate__fadeInLeft">
+                <h2 class="text-2xl font-semibold mb-4">Upload Image</h2>
+                
+                <div id="upload-area" class="upload-area">
+                    <input type="file" id="file-input" class="hidden" accept="image/*">
+                    <div id="upload-prompt">
+                        <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <p class="mt-2 text-gray-600">Click to browse or drag and drop</p>
+                        <p class="text-sm text-gray-500">Supported formats: JPEG, PNG</p>
+                    </div>
+                    
+                    <div id="preview-container" class="hidden">
+                        <img id="preview-image" class="max-h-64 mx-auto mb-4 rounded-lg" src="" alt="Preview">
+                        <button id="change-image" class="text-sm text-blue-600 hover:text-blue-800">Choose different image</button>
+                    </div>
+                </div>
+                
+                <div class="mt-6 text-center">
+                    <button id="analyze-btn" class="btn-primary text-white font-bold py-3 px-6 rounded-lg opacity-50 cursor-not-allowed" disabled>
+                        Analyze Image
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Results Section -->
+            <div class="card bg-white p-6 animate__animated animate__fadeInRight">
+                <h2 class="text-2xl font-semibold mb-4">Diagnosis Results</h2>
+                
+                <div id="results-placeholder" class="text-center py-12">
+                    <p class="text-gray-500">Upload and analyze an image to see results</p>
+                </div>
+                
+                <div id="loader" class="hidden justify-center items-center py-12">
+                    <div class="loader"></div>
+                    <p class="ml-4 text-gray-600">Analyzing your image...</p>
+                </div>
+                
+                <div id="results-container" class="hidden">
+                    <div class="mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Diagnosis:</h3>
+                        <div class="flex items-center bg-blue-50 p-4 rounded-lg">
+                            <div class="bg-blue-100 p-3 rounded-full">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <p class="font-medium" id="diagnosis-result">-</p>
+                                <p class="text-sm text-gray-600" id="confidence-score">Confidence: -</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Probability Distribution:</h3>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <img id="chart-image" class="w-full" src="" alt="Probability Chart">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Treatment Section -->
+        <div id="treatment-section" class="card bg-white p-6 mt-8 hidden animate__animated animate__fadeInUp">
+            <h2 class="text-2xl font-semibold mb-4">Recommended Treatment</h2>
+            <div class="treatment-section bg-gray-50 p-5 rounded-lg text-gray-800" id="treatment-content">
+                
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('file-input');
+            const uploadPrompt = document.getElementById('upload-prompt');
+            const previewContainer = document.getElementById('preview-container');
+            const previewImage = document.getElementById('preview-image');
+            const changeImageBtn = document.getElementById('change-image');
+            const analyzeBtn = document.getElementById('analyze-btn');
+            const resultsPlaceholder = document.getElementById('results-placeholder');
+            const loader = document.getElementById('loader');
+            const resultsContainer = document.getElementById('results-container');
+            const diagnosisResult = document.getElementById('diagnosis-result');
+            const confidenceScore = document.getElementById('confidence-score');
+            const chartImage = document.getElementById('chart-image');
+            const treatmentSection = document.getElementById('treatment-section');
+            const treatmentContent = document.getElementById('treatment-content');
+            
+            // Handle upload area click
+            uploadArea.addEventListener('click', function() {
+                fileInput.click();
+            });
+            
+            // Handle drag and drop
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('border-blue-500');
+                uploadArea.classList.add('bg-blue-50');
+            });
+            
+            uploadArea.addEventListener('dragleave', function() {
+                uploadArea.classList.remove('border-blue-500');
+                uploadArea.classList.remove('bg-blue-50');
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('border-blue-500');
+                uploadArea.classList.remove('bg-blue-50');
+                
+                if (e.dataTransfer.files.length) {
+                    handleFile(e.dataTransfer.files[0]);
+                }
+            });
+            
+            // Handle file selection
+            fileInput.addEventListener('change', function() {
+                if (fileInput.files.length) {
+                    handleFile(fileInput.files[0]);
+                }
+            });
+            
+            // Handle change image button
+            changeImageBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                resetUI();
+                fileInput.value = '';
+                fileInput.click();
+            });
+            
+            // Handle analyze button click
+            analyzeBtn.addEventListener('click', function() {
+                if (fileInput.files.length) {
+                    analyzeImage(fileInput.files[0]);
+                }
+            });
+            
+            function handleFile(file) {
+                // Check if file is an image
+                if (!file.type.match('image.*')) {
+                    alert('Please select an image file');
+                    return;
+                }
+                
+                // Display preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    uploadPrompt.classList.add('hidden');
+                    previewContainer.classList.remove('hidden');
+                    analyzeBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    analyzeBtn.disabled = false;
+                    
+                    // Add animation
+                    previewContainer.classList.add('fadeIn');
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            function analyzeImage(file) {
+                // Show loader
+                resultsPlaceholder.classList.add('hidden');
+                resultsContainer.classList.add('hidden');
+                treatmentSection.classList.add('hidden');
+                loader.classList.remove('hidden');
+                loader.classList.add('flex');
+                
+                // Create form data
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                // Send to backend
+                fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide loader
+                    loader.classList.add('hidden');
+                    loader.classList.remove('flex');
+                    
+                    if (data.error) {
+                        alert('Error: ' + data.error);
+                        return;
+                    }
+                    
+                    // Show results
+                    diagnosisResult.textContent = data.class;
+                    confidenceScore.textContent = 'Confidence: ' + data.confidence;
+                    chartImage.src = 'data:image/png;base64,' + data.chart;
+                    
+                    // Show treatment
+                    treatmentContent.textContent = data.treatment;
+                    
+                    resultsContainer.classList.remove('hidden');
+                    treatmentSection.classList.remove('hidden');
+                    
+                    // Add animations
+                    resultsContainer.classList.add('animate__animated', 'animate__fadeIn');
+                    treatmentSection.classList.add('animate__animated', 'animate__fadeIn');
+                    
+                    // Scroll to results
+                    treatmentSection.scrollIntoView({ behavior: 'smooth' });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    loader.classList.add('hidden');
+                    loader.classList.remove('flex');
+                    alert('An error occurred. Please try again.');
+                });
+            }
+            
+            function resetUI() {
+                // Reset preview
+                uploadPrompt.classList.remove('hidden');
+                previewContainer.classList.add('hidden');
+                
+                // Reset analyze button
+                analyzeBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                analyzeBtn.disabled = true;
+                
+                // Reset results
+                resultsPlaceholder.classList.remove('hidden');
+                resultsContainer.classList.add('hidden');
+                treatmentSection.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
