@@ -7,3 +7,4 @@ io
 base64
 numpy
 matplotlib
+Pillow
