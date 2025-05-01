@@ -2,7 +2,6 @@ flask
 gunicorn
 torch
 torchvision
-PIL
 io
 base64
 numpy
