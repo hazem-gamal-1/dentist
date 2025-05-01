@@ -2,7 +2,6 @@ flask
 gunicorn
 torch
 torchvision
-base64
 numpy
 matplotlib
 Pillow
