@@ -28,9 +28,7 @@ config = Config()
 
 # Initialize model
 model = DentalModel(num_classes=config.NUM_CLASSES, model_name="efficientnet_b2")
-model.load_state_dict(torch.load(model_path, map_location=device, weights_only=False))
-
-model.to(device)
+model.load_state_dict(torch.load(model_path, map_location=device))
 model.eval()
 
 # Define transforms for inference
